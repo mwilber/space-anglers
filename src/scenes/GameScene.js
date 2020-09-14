@@ -7,6 +7,7 @@ export class GameScene extends Phaser.Scene {
 		});
 
 		this.playerThrust = 1000;
+		this.playerMaxTilt = 0.9;
 	}
 
 	preload() {
@@ -25,21 +26,47 @@ export class GameScene extends Phaser.Scene {
 		this.cursors = this.input.keyboard.createCursorKeys();
 
 		this.player         = this.createPlayer();
+
+		this.player.setRotation(this.degrees_to_radians(45))
 	}
 
 	update() {
 
 		if (this.cursors.left.isDown){
 			this.player.setAccelerationX(-this.playerThrust);
+			if(Math.abs(this.player.rotation) < this.playerMaxTilt){
+				this.player.setAngularAcceleration(-100);
+			}else{
+				this.player.setAngularAcceleration(0);
+				this.player.setAngularVelocity(0);
+			}
 		}else if (this.cursors.right.isDown){
 			this.player.setAccelerationX(this.playerThrust);
+			if(Math.abs(this.player.rotation) < this.playerMaxTilt){
+				this.player.setAngularAcceleration(100);
+			}else{
+				this.player.setAngularAcceleration(0);
+				this.player.setAngularVelocity(0);
+			}
 		}else{
 			this.player.setAccelerationX(0);
+			this.player.setAngularAcceleration(0);
+
+			if(this.player.rotation > 0.05 ){
+				this.player.setAngularAcceleration(-this.playerThrust);
+			}else if(this.player.rotation < -0.05 ){
+				this.player.setAngularAcceleration(this.playerThrust);
+			}else{
+				this.player.setAngularVelocity(0);
+				this.player.setRotation(0);
+			}
 		}
 
 		if (this.cursors.up.isDown && this.player.body.touching.down){
 			this.player.setVelocityY(-750);
 		}
+
+
 
 	}
 
@@ -57,6 +84,12 @@ export class GameScene extends Phaser.Scene {
 
 		
 		return player;
+	}
+
+	degrees_to_radians(degrees)
+	{
+		var pi = Math.PI;
+		return degrees * (pi/180);
 	}
 	
 }
